@@ -1,0 +1,49 @@
+import uuid
+from datetime import datetime
+from typing import Any
+
+import sqlalchemy as sa
+from sqlalchemy import UUID, ForeignKey, func
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.entities.auth.user import User
+from app.entities.base.base import BaseEntity, DeclarativeBase
+from app.entities.messages.conversation import Conversation
+
+
+class Message(BaseEntity):
+    __tablename__ = "messages"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=sa.text("gen_random_uuid()"),
+    )
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("pam.users.id"))
+    parent_message_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("pam.messages.id")
+    )
+    conversation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("pam.conversations.id")
+    )
+    role: Mapped[str]
+    content: Mapped[str]
+    content_new: Mapped[dict[str, Any]] = mapped_column(
+        MutableDict.as_mutable(JSONB), nullable=False, default=dict
+    )
+    timestamp: Mapped[datetime] = mapped_column(default=func.now())
+
+    user: Mapped[User] = relationship(User, foreign_keys=[user_id], uselist=False)
+    parent_message: Mapped["Message"] = relationship(
+        "Message",
+        foreign_keys=[parent_message_id],
+        uselist=False,
+    )
+    conversation: Mapped["Conversation"] = relationship(
+        "Conversation",
+        foreign_keys=[conversation_id],
+        uselist=False,
+    )

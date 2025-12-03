@@ -1,0 +1,26 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+  default:
+    "()": uvicorn.logging.DefaultFormatter
+    datefmt: "%Y-%m-%d %H:%M:%S"
+    format: '%(asctime)s %(levelname)-8s %(message)s'
+handlers:
+  default:
+    formatter: default
+    class: logging.StreamHandler
+    stream: ext://sys.stdout
+  file_app_hourly:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: INFO
+    formatter: default
+    filename: logs/app.log
+    when: H          # rotate every hour
+    interval: 1
+    backupCount: 168 # keep ~7 days of hourly logs
+    encoding: utf8
+    utc: true        # avoid DST issues
+root:
+  handlers: [default, file_app_hourly]
+  level: INFO
+  propagate: no

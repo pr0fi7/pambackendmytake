@@ -1,0 +1,11 @@
+dependency-injector
+httpx
+passlib
+sqlalchemy
+psycopg2-binary
+pydantic
+pydantic-settings
+fastapi
+uvicorn
+PyJWT
+pyyaml

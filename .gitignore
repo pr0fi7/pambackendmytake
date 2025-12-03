@@ -1,0 +1,8 @@
+.idea
+*.env
+**/__pycache__/**
+
+venv
+logs/*
+
+google_credentials.json
